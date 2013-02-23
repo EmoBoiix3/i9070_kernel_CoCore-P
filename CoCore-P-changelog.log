@@ -1,0 +1,45 @@
+2013-02-22
+defconfig:		bump version 1.0
+logger:			make as module 
+
+2013-02-21
+defconfig:		bump version 0.9
+defconfig:		enable pn544 config
+defconfig:		disable mismatch checking
+board-janice:		increase touchscreen sensitivity
+			(fix sensitivity issuse)
+rcu:			enable fast nohz rcu
+arm:			enable thumbee
+arm:			build vfp with neon+hardfloat
+net:			enable advanced tcp configs
+mm:			slab -> slub
+mali:			disable mali state tracking 
+mali:			mali l2 max reads 28kb -> 48kb
+block:			add bfq io scheduler
+block:			add zen io scheduler
+block:			add sio io scheduler
+block:			add vr io scheduler
+blcok:			add as io scheduler
+sched:			add nr_running symbol
+cpuidle:		deepest state 5 -> 4
+cpufreq:		merge governors from mini
+cpufreq:		update pegasusq governor
+cpufreq:		add nightmare governor
+cpufreq:		add hotplug governor
+bcm4330:		pm_max -> pm_fast
+arm:			patch arm crypto
+arm:			patch ezekeel resem
+ab8500-asoc:		patch sound control
+ab8500-chargalg:	patch real full charged notification
+debug:			disable kgdb
+
+2013-02-17
+defconfig: 		add CoCore-P config
+defconfig:		fix configs
+drivers:		fix ISSP clean error
+drivers:		add samsung drivers
+drivers:		add pn544 driver
+board:			add nfc i2c pdata
+board:			enable nfc gpios
+timer:			add usleep range
+arch:			add um arch folder

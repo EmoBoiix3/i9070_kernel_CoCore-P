@@ -1,0 +1,169 @@
+#!/bin/bash
+
+# Mulit-call build script
+
+WORKDIR="/home/cocafe/Android"
+
+DIR="/home/cocafe/Android/CoCore-P"
+
+PROJECT="CoCore-P"
+
+CONFIG="u8500_CoCore-P_defconfig"
+
+
+do_sync ()
+{
+	sync; sync
+}
+
+open_gedit ()
+{
+	gedit $DIR/build.sh & 
+	gedit $DIR/CoCore-P-changelog.log & 
+	gedit $DIR/$CONFIG & 
+
+	if [ -f /media/I9070MMC/Notes/TODO.txt ]
+	then
+		gedit /media/I9070MMC/Notes/TODO.txt &
+	fi
+}
+
+arch_gpu ()
+{
+	echo -e "\n\n Fixing Mali arch folder ...\n\n"
+	rm -rf $DIR/kernel/drivers/gpu/mali/mali400ko/driver/src/devicedrv/mali/arch
+}
+
+clean ()
+{
+	. build.sh clean
+	cd $DIR
+}
+
+rm_kernel ()
+{
+	echo -e "\n\n *** Removing kernel source ... ***\n\n"
+	cd $WORKDIR
+	rm -rf $DIR
+}
+
+make_config ()
+{
+	. build.sh makeconfig
+}
+
+update_config ()
+{
+	. build.sh makeconfig
+	echo -e "\n\n Updating $CONFIG ... \n\n"
+	mv $DIR/kernel/arch/arm/configs/$CONFIG $DIR/kernel/arch/arm/configs/$CONFIG.old
+	cp $DIR/kernel/.config $DIR/kernel/arch/arm/configs/$CONFIG
+	diff -Naur $DIR/kernel/arch/arm/configs/$CONFIG.old $DIR/kernel/arch/arm/configs/$CONFIG
+	cd $DIR
+}
+
+build_tar ()
+{
+	TIME_START=$SECONDS
+	echo -e "\n\n Building tarball ...\n\n"
+	cd $WORKDIR
+	tar -zcvf $2.tar.gz $PROJECT
+	cd $DIR
+	TIME_FINISH=$SECONDS
+	echo -e "\n\n Finished in $((TIME_FINISH-TIME_START)) Seconds\n\n"
+}
+
+build_odin ()
+{
+	if [ -f $DIR/out/kernel.bin.md5 ]
+	then
+		cd $DIR/out
+		echo -e "\n\n Generating Odin Flasheable Kernel...\n\n"
+		tar cf GT-I9070-Kernel-CoCore-P.tar kernel.bin.md5
+		md5sum -t GT-I9070-Kernel-CoCore-P.tar >> GT-I9070-Kernel-CoCore-P.tar
+		mv GT-I9070-Kernel-CoCore-P.tar GT-I9070-Kernel-CoCore-P.tar.md5
+		cd $DIR
+	else
+		echo -e "\n\n *** Output zImage is not found ***\n\n"
+	fi
+}
+
+build_modules ()
+{
+	. build.sh modules
+}
+
+build_kernel ()
+{
+	echo -e "\n\n Compiling Kernel... \n"
+	. build.sh
+	cd $DIR
+}
+
+build_zImage ()
+{
+	. build.sh zImage
+	cd $DIR
+}
+
+build_release ()
+{
+	. build.sh
+	cd $DIR
+	cp $DIR/kernel/fs/cifs/cifs.ko $DIR/out/cifs.ko
+}
+
+md5_kernel ()
+{
+	echo -e "\n\n Generating md5 info \n\n"
+	md5sum -t $DIR/out/kernel.bin.md5 >> $DIR/out/md5.txt
+}
+
+
+case "$1" in
+	gedit)
+		open_gedit
+		;;
+	archgpu)
+		arch_gpu
+		;;
+	clean)
+		clean
+		do_sync
+		;;
+	rmkernel)
+		rm_kernel
+		do_sync
+		;;
+	odin)
+		build_odin
+		;;
+	tar)
+		build_tar
+		do_sync
+		;;
+	modules)
+		build_modules
+		do_sync
+		;;
+	make_config)
+		make_config
+		;;
+	update_config)
+		update_config
+		;;
+	md5_kernel)
+		md5_kernel
+		;;
+	zImage)
+		build_zImage
+		;;
+	release)
+		build_release
+		;;
+	*)
+		build_kernel
+		do_sync
+		;;
+esac
+
